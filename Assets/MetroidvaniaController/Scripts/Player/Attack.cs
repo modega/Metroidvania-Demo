@@ -28,7 +28,7 @@ public class Attack : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-		if (Input.GetKeyDown(KeyCode.X) && canAttack)
+		if ( (Input.GetKeyDown(KeyCode.X) || Input.GetKeyDown(KeyCode.Joystick1Button2)) && canAttack)
 		{
 			canAttack = false;
 			animator.SetBool("IsAttacking", true);
