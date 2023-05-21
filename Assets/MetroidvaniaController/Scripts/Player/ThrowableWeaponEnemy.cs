@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ThrowableWeapon : MonoBehaviour
+public class ThrowableWeaponEnemy : MonoBehaviour
 {
 	public Vector2 direction;
 	public bool hasHit = false;
@@ -23,12 +23,15 @@ public class ThrowableWeapon : MonoBehaviour
 
 	void OnCollisionEnter2D(Collision2D collision)
 	{
-		if (collision.gameObject.tag == "Enemy")
-		{
-			collision.gameObject.SendMessage("ApplyDamage", Mathf.Sign(direction.x) * 2f);
-			Destroy(gameObject);
-		}
-        else if (collision.gameObject.tag != "Player")
+        if (collision.gameObject.tag == "Player")
+        {
+            object[] values = new object[2];
+            values[0] = Mathf.Sign(direction.x) * 2f;
+            values[1] = transform.position;
+            collision.gameObject.SendMessage("ApplyDamage", values);
+            Destroy(gameObject);
+        }
+        else if (collision.gameObject.tag != "Enemy")
 		{
 			Destroy(gameObject);
 		}

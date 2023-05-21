@@ -1,168 +1,194 @@
 using UnityEngine;
 using System.Collections;
-using System;
+using UnityEditor.ShaderGraph.Internal;
+using static UnityEngine.GraphicsBuffer;
 
-public class Enemy : MonoBehaviour {
+public class Enemy : MonoBehaviour
+{
 
-	public float life = 10;
-	private bool isPlat;
-	private bool isObstacle;
-	private Transform fallCheck;
-	private Transform wallCheck;
-	private Transform playerCheck;
-    public GameObject throwableObject;
+    public float life = 10;
+    private bool isPlat;
+    private bool isObstacle;
+    private Transform fallCheck;
+    private Transform wallCheck;
     public LayerMask turnLayerMask;
-	private Rigidbody2D rb;
-	private Transform playerLocation; 
+    private Rigidbody2D rb;
 
-	private bool facingRight = true;
-	
-	public float speed = 5f;
+    private bool facingRight = true;
 
-	public bool isInvincible = false;
-	private bool isHitted = false;
-	private bool canShoot = false;
-	private bool canAttack = true;
+    public float speed = 5f;
 
-	void Awake () {
-		fallCheck = transform.Find("FallCheck");
-		wallCheck = transform.Find("WallCheck");
-        playerCheck = transform.Find("PlayerCheck");
-        rb = GetComponent<Rigidbody2D>();
-	}
+    public bool isInvincible = false;
+    private bool isHitted = false;
 
-    private void Update()
+    public GameObject throwableObject;
+
+    [field: SerializeField]
+    public bool PlayerDetected { get; private set; }
+    public Vector2 DirectionToTarget => target.transform.position - detectorOrigin.position;
+
+    private GameObject target;
+
+    public GameObject Target
     {
-        if (canShoot)
+        get => target;
+        private set
         {
-			rb.velocity = Vector2.zero;
-			Vector2 dir = (facingRight) ? Vector2.left : Vector2.right;
-            RaycastHit2D hit = Physics2D.Raycast(wallCheck.position, dir);
-			//Debug.DrawRay(wallCheck.position, dir, Color.red);
-			//Debug.Log(hit.collider.gameObject.name);
-            if (hit.collider != null) {
-				Debug.Log(hit.collider.gameObject.tag.ToString());
-				//if (hit.collider.gameObject.tag.ToString() != "Player") Flip();
-			}
-            if (canAttack)
-            {
-                GameObject throwableProj = Instantiate(throwableObject, transform.position + new Vector3(transform.localScale.x * 0.5f, -0.2f), Quaternion.identity) as GameObject;
-                throwableProj.GetComponent<ThrowableProjectile>().owner = gameObject;
-                Vector2 direction = new Vector2(transform.localScale.x, 0f);
-                throwableProj.GetComponent<ThrowableProjectile>().direction = direction;
-                canAttack = false;
-                StartCoroutine(AttackCooldown());
-            }
-
+            target = value;
+            PlayerDetected = target != null;
         }
+    }
+
+    public float detectionDelay = 0.3f;
+    public LayerMask detectorLayerMask;
+
+    [SerializeField]
+    private Transform detectorOrigin;
+    public Vector2 detectorSize = Vector2.zero;
+    public Vector2 detectorOriginOffset = Vector2.zero;
+
+    public Color gizmoIdleColor = Color.green;
+    public Color gizmoDetectedColor = Color.red;
+    public bool showGizmos = true;
+    void Awake()
+    {
+        fallCheck = transform.Find("FallCheck");
+        wallCheck = transform.Find("WallCheck");
+        rb = GetComponent<Rigidbody2D>();
+    }
+
+    void Start()
+    {
+        StartCoroutine(DetectionCoroutine());
     }
 
     // Update is called once per frame
-    void FixedUpdate () {
-        if (life <= 0) {
-			transform.GetComponent<Animator>().SetBool("IsDead", true);
-			StartCoroutine(DestroyEnemy());
+    void FixedUpdate()
+    {
+
+        if (life <= 0)
+        {
+            transform.GetComponent<Animator>().SetBool("IsDead", true);
+            StartCoroutine(DestroyEnemy());
         }
 
-		isPlat = Physics2D.OverlapCircle(fallCheck.position, .2f, 1 << LayerMask.NameToLayer("Default"));
-		isObstacle = Physics2D.OverlapCircle(wallCheck.position, .2f, turnLayerMask);
-		
+        isPlat = Physics2D.OverlapCircle(fallCheck.position, .2f, 1 << LayerMask.NameToLayer("Default"));
+        isObstacle = Physics2D.OverlapCircle(wallCheck.position, .2f, turnLayerMask);
 
-        if (!isHitted && life > 0 && !canShoot && Mathf.Abs(rb.velocity.y) < 0.5f)
-		{
-            if (isPlat && !isObstacle && !isHitted)
+        if (!PlayerDetected)
+        {
+            if (!isHitted && life > 0 && Mathf.Abs(rb.velocity.y) < 0.5f)
             {
-                if (facingRight)
+                if (isPlat && !isObstacle && !isHitted)
                 {
-                    rb.velocity = new Vector2(-speed, rb.velocity.y);
+                    if (facingRight)
+                    {
+                        rb.velocity = new Vector2(-speed, rb.velocity.y);
+                    }
+                    else
+                    {
+                        rb.velocity = new Vector2(speed, rb.velocity.y);
+                    }
                 }
                 else
                 {
-                    rb.velocity = new Vector2(speed, rb.velocity.y);
+                    Flip();
+                    detectorOriginOffset = new Vector2(-1 * detectorOriginOffset.x, detectorOriginOffset.y);
                 }
             }
-            else
-            {
-                Flip();
-            }
-		}
-	}
 
-	void Flip (){
-		// Switch the way the player is labelled as facing.
-		facingRight = !facingRight;
-		
-		// Multiply the player's x local scale by -1.
-		Vector3 theScale = transform.localScale;
-		theScale.x *= -1;
-		transform.localScale = theScale;
-	}
-
-	public void ApplyDamage(float damage) {
-		if (!isInvincible) 
-		{
-			float direction = damage / Mathf.Abs(damage);
-			damage = Mathf.Abs(damage);
-			transform.GetComponent<Animator>().SetBool("Hit", true);
-			life -= damage;
-			rb.velocity = Vector2.zero;
-			rb.AddForce(new Vector2(direction * 500f, 100f));
-			StartCoroutine(HitTime());
-		}
-	}
-
-	void OnCollisionStay2D(Collision2D collision)
-	{
-		if (collision.gameObject.tag == "Player" && life > 0)
-		{
-			collision.gameObject.GetComponent<CharacterController2D>().ApplyDamage(2f, transform.position);
-		}
-	}
-
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (collision.gameObject.tag == "Player")
-		{
-			playerLocation = collision.gameObject.transform;
-            Debug.Log("Player Detected.");
-			canShoot = true;
-		}
+        }
+        else
+        {
+            rb.velocity = Vector2.zero;
+            //GameObject throwableWeapon = Instantiate(throwableObject, this.gameObject.transform.position + new Vector3(transform.localScale.x * 0.5f, -0.2f), Quaternion.identity) as GameObject;
+            //Vector2 direction = new Vector2(transform.localScale.x, 0);
+            //throwableWeapon.GetComponent<ThrowableWeaponEnemy>().direction = direction;
+            //throwableWeapon.name = "ThrowableWeaponEnemy";
+        }
     }
 
-    private void OnTriggerExit2D(Collider2D collision)
+    void Flip()
     {
-		if (collision.gameObject.tag == "Player")
-		{
-			playerLocation = null;
-            canShoot = false;
-			Debug.Log("Player Not Detected.");
-		}
+        // Switch the way the player is labelled as facing.
+        facingRight = !facingRight;
+
+        // Multiply the player's x local scale by -1.
+        Vector3 theScale = transform.localScale;
+        theScale.x *= -1;
+        transform.localScale = theScale;
+    }
+
+    public void ApplyDamage(float damage)
+    {
+        if (!isInvincible)
+        {
+            float direction = damage / Mathf.Abs(damage);
+            damage = Mathf.Abs(damage);
+            transform.GetComponent<Animator>().SetBool("Hit", true);
+            life -= damage;
+            rb.velocity = Vector2.zero;
+            rb.AddForce(new Vector2(direction * 500f, 100f));
+            StartCoroutine(HitTime());
+        }
+    }
+
+    void OnCollisionStay2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "Player" && life > 0)
+        {
+            collision.gameObject.GetComponent<CharacterController2D>().ApplyDamage(2f, transform.position);
+        }
     }
 
     IEnumerator HitTime()
-	{
-		isHitted = true;
-		isInvincible = true;
-		yield return new WaitForSeconds(0.1f);
-		isHitted = false;
-		isInvincible = false;
-	}
-
-	IEnumerator DestroyEnemy()
-	{
-		CapsuleCollider2D capsule = GetComponent<CapsuleCollider2D>();
-		capsule.size = new Vector2(1f, 0.25f);
-		capsule.offset = new Vector2(0f, -0.8f);
-		capsule.direction = CapsuleDirection2D.Horizontal;
-		yield return new WaitForSeconds(0.25f);
-		rb.velocity = new Vector2(0, rb.velocity.y);
-		yield return new WaitForSeconds(3f);
-		Destroy(gameObject);
-	}
-    IEnumerator AttackCooldown()
     {
-        canAttack = true;
-        //Debug.Log("Can shoot now.");
-        yield return new WaitForSeconds(15f);
+        isHitted = true;
+        isInvincible = true;
+        yield return new WaitForSeconds(0.1f);
+        isHitted = false;
+        isInvincible = false;
+    }
+
+    IEnumerator DestroyEnemy()
+    {
+        CapsuleCollider2D capsule = GetComponent<CapsuleCollider2D>();
+        capsule.size = new Vector2(1f, 0.25f);
+        capsule.offset = new Vector2(0f, -0.8f);
+        capsule.direction = CapsuleDirection2D.Horizontal;
+        yield return new WaitForSeconds(0.25f);
+        rb.velocity = new Vector2(0, rb.velocity.y);
+        yield return new WaitForSeconds(3f);
+        Destroy(gameObject);
+    }
+
+    IEnumerator DetectionCoroutine()
+    {
+        yield return new WaitForSeconds(detectionDelay);
+        detectPlayer();     
+        StartCoroutine(DetectionCoroutine());
+    }
+
+    void detectPlayer()
+    {
+        Collider2D collider = Physics2D.OverlapBox((Vector2)detectorOrigin.position + detectorOriginOffset, detectorSize, 0, detectorLayerMask);
+        if(collider != null)
+        {
+            Target = collider.gameObject;
+        }
+        else
+        {
+            Target = null;
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        if(showGizmos && detectorOrigin != null)
+        {
+            Gizmos.color = gizmoIdleColor;
+            if (PlayerDetected) Gizmos.color = gizmoDetectedColor;
+            Gizmos.DrawCube((Vector2)detectorOrigin.position + detectorOriginOffset, detectorSize);
+        }
     }
 }
