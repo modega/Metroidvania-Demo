@@ -21,8 +21,6 @@ public class Enemy : MonoBehaviour
     public bool isInvincible = false;
     private bool isHitted = false;
 
-    public GameObject throwableObject;
-
     [field: SerializeField]
     public bool PlayerDetected { get; private set; }
     public Vector2 DirectionToTarget => target.transform.position - detectorOrigin.position;
@@ -50,6 +48,8 @@ public class Enemy : MonoBehaviour
     public Color gizmoIdleColor = Color.green;
     public Color gizmoDetectedColor = Color.red;
     public bool showGizmos = true;
+
+    public bool canShoot = true;
     void Awake()
     {
         fallCheck = transform.Find("FallCheck");
@@ -101,7 +101,9 @@ public class Enemy : MonoBehaviour
         else
         {
             rb.velocity = Vector2.zero;
-            //StartCoroutine(ShootCoroutine());
+            canShoot = false;
+            this.gameObject.GetComponent<EnemyAttack>().shoot();
+            StartCoroutine(ShootDelay());
         }
     }
 
@@ -166,21 +168,6 @@ public class Enemy : MonoBehaviour
         StartCoroutine(DetectionCoroutine());
     }
 
-    IEnumerator ShootCoroutine()
-    {
-        yield return new WaitForSeconds(1f);
-        shoot();
-        StartCoroutine(ShootCoroutine());
-    }
-
-    void shoot()
-    {
-        GameObject throwableWeapon = Instantiate(throwableObject, this.gameObject.transform.position + new Vector3(transform.localScale.x * 0.5f, -0.2f), Quaternion.identity) as GameObject;
-        Vector2 direction = new Vector2(transform.localScale.x, 0);
-        throwableWeapon.GetComponent<ThrowableWeaponEnemy>().direction = direction;
-        throwableWeapon.name = "ThrowableWeaponEnemy";
-    }
-
     void detectPlayer()
     {
         Collider2D collider = Physics2D.OverlapBox((Vector2)detectorOrigin.position + detectorOriginOffset, detectorSize, 0, detectorLayerMask);
@@ -192,6 +179,12 @@ public class Enemy : MonoBehaviour
         {
             Target = null;
         }
+    }
+
+    IEnumerator ShootDelay()
+    {
+        yield return new WaitForSeconds(0.5f);
+        canShoot = true;
     }
 
     private void OnDrawGizmos()
