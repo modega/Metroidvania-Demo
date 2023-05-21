@@ -1133,7 +1133,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42ade8b522cec0a42978adf14e941b97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  throwableObject: {fileID: 0}
+  throwableObject: {fileID: 5532974359214069763, guid: 71195288a9a7bb44b8b37118f9456fd9, type: 3}
 --- !u!1001 &1423642428
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1325,7 +1325,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42ade8b522cec0a42978adf14e941b97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  throwableObject: {fileID: 0}
+  throwableObject: {fileID: 5532974359214069763, guid: 71195288a9a7bb44b8b37118f9456fd9, type: 3}
 --- !u!1 &1637668098
 GameObject:
   m_ObjectHideFlags: 0
@@ -19835,7 +19835,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42ade8b522cec0a42978adf14e941b97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  throwableObject: {fileID: 0}
+  throwableObject: {fileID: 5532974359214069763, guid: 71195288a9a7bb44b8b37118f9456fd9, type: 3}
 --- !u!1 &1943995067
 GameObject:
   m_ObjectHideFlags: 0
@@ -19995,4 +19995,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42ade8b522cec0a42978adf14e941b97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  throwableObject: {fileID: 0}
+  throwableObject: {fileID: 5532974359214069763, guid: 71195288a9a7bb44b8b37118f9456fd9, type: 3}
