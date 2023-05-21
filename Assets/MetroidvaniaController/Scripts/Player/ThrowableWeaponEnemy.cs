@@ -7,15 +7,15 @@ public class ThrowableWeaponEnemy : MonoBehaviour
 	public Vector2 direction;
 	public bool hasHit = false;
 	public float speed = 15f;
+	public GameObject owner;
 
     void FixedUpdate()
     {
-		if ( !hasHit)
-		GetComponent<Rigidbody2D>().velocity = direction * speed;
+		if (!hasHit) GetComponent<Rigidbody2D>().velocity = direction * speed;
 	}
 	void OnCollisionEnter2D(Collision2D collision)
 	{
-        if (collision.gameObject.tag == "Player")
+        if (owner != null && collision.gameObject != owner && collision.gameObject.tag == "Player")
         {
             collision.gameObject.GetComponent<CharacterController2D>().ApplyDamage(2f, transform.position);
             Destroy(gameObject);

@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using UnityEditor.ShaderGraph.Internal;
 using static UnityEngine.GraphicsBuffer;
+using Unity.VisualScripting;
 
 public class Enemy : MonoBehaviour
 {
@@ -50,6 +51,9 @@ public class Enemy : MonoBehaviour
     public bool showGizmos = true;
 
     public bool canShoot = true;
+
+    private float cooldown = 2f;
+    private float cooldownTimer;
     void Awake()
     {
         fallCheck = transform.Find("FallCheck");
@@ -62,6 +66,23 @@ public class Enemy : MonoBehaviour
         StartCoroutine(DetectionCoroutine());
     }
 
+    private void Update()
+    {
+        if (PlayerDetected)
+        {
+            shootProjectile();
+        }
+    }
+
+    private void shootProjectile()
+    {
+        cooldownTimer -= Time.deltaTime;
+
+        if (cooldownTimer > 0) return;
+
+        cooldownTimer = cooldown;
+        this.gameObject.GetComponent<EnemyAttack>().shoot();
+    }
     // Update is called once per frame
     void FixedUpdate()
     {
@@ -101,9 +122,6 @@ public class Enemy : MonoBehaviour
         else
         {
             rb.velocity = Vector2.zero;
-            canShoot = false;
-            this.gameObject.GetComponent<EnemyAttack>().shoot();
-            StartCoroutine(ShootDelay());
         }
     }
 
@@ -183,7 +201,7 @@ public class Enemy : MonoBehaviour
 
     IEnumerator ShootDelay()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(3.5f);
         canShoot = true;
     }
 

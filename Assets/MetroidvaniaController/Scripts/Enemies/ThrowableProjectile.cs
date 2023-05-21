@@ -12,8 +12,7 @@ public class ThrowableProjectile : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-		if ( !hasHit)
-		GetComponent<Rigidbody2D>().velocity = direction * speed;
+		if (!hasHit) GetComponent<Rigidbody2D>().velocity = direction * speed;
 	}
 
 	void OnCollisionEnter2D(Collision2D collision)
