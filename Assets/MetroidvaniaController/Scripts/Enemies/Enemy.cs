@@ -101,10 +101,7 @@ public class Enemy : MonoBehaviour
         else
         {
             rb.velocity = Vector2.zero;
-            //GameObject throwableWeapon = Instantiate(throwableObject, this.gameObject.transform.position + new Vector3(transform.localScale.x * 0.5f, -0.2f), Quaternion.identity) as GameObject;
-            //Vector2 direction = new Vector2(transform.localScale.x, 0);
-            //throwableWeapon.GetComponent<ThrowableWeaponEnemy>().direction = direction;
-            //throwableWeapon.name = "ThrowableWeaponEnemy";
+            //StartCoroutine(ShootCoroutine());
         }
     }
 
@@ -167,6 +164,21 @@ public class Enemy : MonoBehaviour
         yield return new WaitForSeconds(detectionDelay);
         detectPlayer();     
         StartCoroutine(DetectionCoroutine());
+    }
+
+    IEnumerator ShootCoroutine()
+    {
+        yield return new WaitForSeconds(1f);
+        shoot();
+        StartCoroutine(ShootCoroutine());
+    }
+
+    void shoot()
+    {
+        GameObject throwableWeapon = Instantiate(throwableObject, this.gameObject.transform.position + new Vector3(transform.localScale.x * 0.5f, -0.2f), Quaternion.identity) as GameObject;
+        Vector2 direction = new Vector2(transform.localScale.x, 0);
+        throwableWeapon.GetComponent<ThrowableWeaponEnemy>().direction = direction;
+        throwableWeapon.name = "ThrowableWeaponEnemy";
     }
 
     void detectPlayer()

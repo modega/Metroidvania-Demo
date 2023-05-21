@@ -28,7 +28,7 @@ public class ThrowableWeaponEnemy : MonoBehaviour
             object[] values = new object[2];
             values[0] = Mathf.Sign(direction.x) * 2f;
             values[1] = transform.position;
-            collision.gameObject.SendMessage("ApplyDamage", values);
+            //collision.gameObject.SendMessage("ApplyDamage", values);
             Destroy(gameObject);
         }
         else if (collision.gameObject.tag != "Enemy")
