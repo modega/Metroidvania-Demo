@@ -15,7 +15,13 @@ public class ThrowableWeaponEnemy : MonoBehaviour
 	}
 	void OnCollisionEnter2D(Collision2D collision)
 	{
-        if (owner != null && collision.gameObject != owner && collision.gameObject.tag == "Player")
+
+        if (owner != null && collision.gameObject != owner && collision.gameObject.tag == "Player" && collision.gameObject.GetComponent<CharacterController2D>().isEmpowered)
+        {
+            collision.gameObject.GetComponent<CharacterController2D>().increaseBlood(1);
+            Destroy(gameObject);
+        }
+        else if (owner != null && collision.gameObject != owner && collision.gameObject.tag == "Player")
         {
             collision.gameObject.GetComponent<CharacterController2D>().ApplyDamage(2f, transform.position);
             Destroy(gameObject);

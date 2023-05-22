@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using Unity.VisualScripting;
 
 public class CharacterController2D : MonoBehaviour
 {
@@ -41,7 +42,19 @@ public class CharacterController2D : MonoBehaviour
 	private float jumpWallDistX = 0; //Distance between player and wall
 	private bool limitVelOnWallJump = false; //For limit wall jump distance with low fps
 
-	[Header("Events")]
+    [Header("Player Powers State Visual Effectors")]
+    public Material empowerSprite;
+	public Material normalSprite;
+	[Header("Player Powers")]
+	public bool isEmpowered = false;
+	public float bloodCount = 0f;
+	public float empoweredAttackCount = 0f;
+	[SerializeField]
+    private float empowerCooldown = 1f;
+	[SerializeField]
+    private float empowerCooldownTimer;
+
+    [Header("Events")]
 	[Space]
 
 	public UnityEvent OnFallEvent;
@@ -62,6 +75,31 @@ public class CharacterController2D : MonoBehaviour
 			OnLandEvent = new UnityEvent();
 	}
 
+    private void Update()
+    {
+		if (isEmpowered)
+		{
+			gameObject.GetComponent<SpriteRenderer>().material = empowerSprite;
+			if (!canDoubleJump) canDoubleJump = true;
+			if(!canDash) canDash = true;
+            empowerCooldownCounter();
+		}
+		else
+		{
+			gameObject.GetComponent<SpriteRenderer>().material = normalSprite;
+			empoweredAttackCount = 0;
+		}
+    }
+
+    private void empowerCooldownCounter()
+	{
+        empowerCooldownTimer -= Time.deltaTime;
+
+        if (empowerCooldownTimer > 0) return;
+
+        empowerCooldownTimer = empowerCooldown;
+		isEmpowered = false;
+    }
 
 	private void FixedUpdate()
 	{
@@ -249,7 +287,10 @@ public class CharacterController2D : MonoBehaviour
 		}
 	}
 
-
+	public void increaseBlood(float x)
+	{
+		bloodCount += x;
+	}
 	private void Flip()
 	{
 		// Switch the way the player is labelled as facing.

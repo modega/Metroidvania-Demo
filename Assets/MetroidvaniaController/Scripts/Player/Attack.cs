@@ -42,6 +42,10 @@ public class Attack : MonoBehaviour
 			throwableWeapon.GetComponent<ThrowableWeapon>().direction = direction; 
 			throwableWeapon.name = "ThrowableWeapon";
 		}
+		if(Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.Joystick1Button5))
+		{
+			GetComponent<CharacterController2D>().isEmpowered = true;
+		}
 	}
 
 	IEnumerator AttackCooldown()
@@ -52,7 +56,9 @@ public class Attack : MonoBehaviour
 
 	public void DoDashDamage()
 	{
-		dmgValue = Mathf.Abs(dmgValue);
+		CharacterController2D charControl = gameObject.GetComponent<CharacterController2D>();
+		if (charControl.isEmpowered) charControl.empoweredAttackCount++;
+		dmgValue = (charControl.isEmpowered && charControl.empoweredAttackCount < 2f) ? Mathf.Abs(dmgValue) * 2 : Mathf.Abs(dmgValue);
 		Collider2D[] collidersEnemies = Physics2D.OverlapCircleAll(attackCheck.position, 0.9f);
 		for (int i = 0; i < collidersEnemies.Length; i++)
 		{
