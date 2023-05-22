@@ -1,8 +1,5 @@
 using UnityEngine;
 using System.Collections;
-using UnityEditor.ShaderGraph.Internal;
-using static UnityEngine.GraphicsBuffer;
-using Unity.VisualScripting;
 
 public class Enemy : MonoBehaviour
 {
