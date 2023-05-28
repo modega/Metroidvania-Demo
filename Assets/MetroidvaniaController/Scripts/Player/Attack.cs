@@ -57,17 +57,23 @@ public class Attack : MonoBehaviour
 	public void DoDashDamage()
 	{
 		CharacterController2D charControl = gameObject.GetComponent<CharacterController2D>();
-		if (charControl.isEmpowered) charControl.empoweredAttackCount++;
-		dmgValue = (charControl.isEmpowered && charControl.empoweredAttackCount < 2f) ? Mathf.Abs(dmgValue) * 2 : Mathf.Abs(dmgValue);
+        dmgValue = (charControl.isParry && charControl.empoweredAttackCount < 1f) ? Mathf.Abs(dmgValue) * 2 : Mathf.Abs(dmgValue);
 		Collider2D[] collidersEnemies = Physics2D.OverlapCircleAll(attackCheck.position, 0.9f);
 		for (int i = 0; i < collidersEnemies.Length; i++)
 		{
 			if (collidersEnemies[i].gameObject.tag == "Enemy")
 			{
+				if (charControl.isParry)
+				{
+					charControl.empoweredAttackCount++;
+                    charControl.isParry = false;
+                }
 				if (collidersEnemies[i].transform.position.x - transform.position.x < 0)
 				{
 					dmgValue = -dmgValue;
-				}
+                    charControl.empoweredAttackCount = 0;
+
+                }
 				collidersEnemies[i].gameObject.SendMessage("ApplyDamage", dmgValue);
 				cam.GetComponent<CameraFollow>().ShakeCamera();
 			}

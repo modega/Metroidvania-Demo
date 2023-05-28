@@ -19,6 +19,7 @@ public class ThrowableWeaponEnemy : MonoBehaviour
         if (owner != null && collision.gameObject != owner && collision.gameObject.tag == "Player" && collision.gameObject.GetComponent<CharacterController2D>().isEmpowered)
         {
             collision.gameObject.GetComponent<CharacterController2D>().increaseBlood(1);
+            collision.gameObject.GetComponent<CharacterController2D>().isParry = true;
             Destroy(gameObject);
         }
         else if (owner != null && collision.gameObject != owner && collision.gameObject.tag == "Player")

@@ -47,6 +47,7 @@ public class CharacterController2D : MonoBehaviour
 	public Material normalSprite;
 	[Header("Player Powers")]
 	public bool isEmpowered = false;
+	public bool isParry = false;
 	public float bloodCount = 0f;
 	public float empoweredAttackCount = 0f;
 	[SerializeField]
@@ -80,14 +81,17 @@ public class CharacterController2D : MonoBehaviour
 		if (isEmpowered)
 		{
 			gameObject.GetComponent<SpriteRenderer>().material = empowerSprite;
-			if (!canDoubleJump) canDoubleJump = true;
-			if(!canDash) canDash = true;
+			if(isParry)
+			{
+                if (!canDoubleJump) canDoubleJump = true;
+                if (!canDash) canDash = true;
+            }
             empowerCooldownCounter();
 		}
 		else
 		{
 			gameObject.GetComponent<SpriteRenderer>().material = normalSprite;
-			empoweredAttackCount = 0;
+			//empoweredAttackCount = 0;
 		}
     }
 

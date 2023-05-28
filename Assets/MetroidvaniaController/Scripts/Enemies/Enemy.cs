@@ -65,7 +65,7 @@ public class Enemy : MonoBehaviour
 
     private void Update()
     {
-        if (PlayerDetected)
+        if (PlayerDetected && life > 0)
         {
             shootProjectile();
         }

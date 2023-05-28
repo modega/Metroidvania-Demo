@@ -36,7 +36,10 @@ public class CameraFollow : MonoBehaviour
 
 	private void Update()
 	{
-		Vector3 newPosition = Target.position;
+		Vector2 velocity = Target.gameObject.GetComponent<Rigidbody2D>().velocity;
+		velocity.x = Mathf.Clamp(velocity.x, -6f, 6f);
+        velocity.y = Mathf.Clamp(velocity.y, -1f, 1f);
+        Vector3 newPosition = Target.position + (Vector3) velocity;
 		newPosition.z = -10;
 		transform.position = Vector3.Slerp(transform.position, newPosition, FollowSpeed * Time.deltaTime);
 
